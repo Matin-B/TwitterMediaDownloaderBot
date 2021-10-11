@@ -10,17 +10,26 @@ def download_tweet(tweet_id):
     try:
         output = []
         media = tweet.extended_entities['media']
-        for item in media:
-            media_type = item['type']
+        if len(media) != 1:
+            links = []
+            for item in media:
+                output.append(
+                    {
+                        'type': 'photo',
+                        'url': item['media_url_https']
+                    }
+                )
+        else:
+            media_type = media[0]['type']
             if media_type == 'photo':
                 output.append(
                     {
                         'type': media_type,
-                        'url': item['media_url_https'],
+                        'url': media[0]['media_url_https'],
                     }
                 )
             elif media_type == 'video':
-                video_info = item['video_info']
+                video_info = media[0]['video_info']
                 media_variants = video_info['variants']
                 count = 0
                 for item in media_variants:
@@ -40,7 +49,7 @@ def download_tweet(tweet_id):
                     }
                 )
             elif media_type == 'animated_gif':
-                gif_info = item['video_info']
+                gif_info = media[0]['video_info']
                 media_variants = gif_info['variants']
                 count = 0
                 for item in media_variants:
