@@ -5,15 +5,28 @@ from tweepy import API, OAuthHandler, Stream
 def download_tweet(tweet_id):
     try:
         tweet = api.get_status(tweet_id, tweet_mode="extended")
+        tweet_text = tweet.full_text
+        tweet_link = tweet_text.split(' ')[-1]
+        tweet_author_username = tweet.user.screen_name
+        tweet_author_name = tweet.user.name
+        tweet_date = tweet.created_at.strftime("%Y/%m/%d | %H-%M") + " UTC"
     except:
         return "Not Found"
     try:
-        output = []
+        output = {
+            "tweet_author_username": tweet_author_username,
+            "tweet_author_name": tweet_author_name,
+            "tweet_date": tweet_date,
+            "text": tweet_text,
+            "link": tweet_link,
+            "urls": [],
+            "media": True
+        }
         media = tweet.extended_entities['media']
         if len(media) != 1:
             links = []
             for item in media:
-                output.append(
+                output['urls'].append(
                     {
                         'type': 'photo',
                         'url': item['media_url_https']
@@ -22,7 +35,7 @@ def download_tweet(tweet_id):
         else:
             media_type = media[0]['type']
             if media_type == 'photo':
-                output.append(
+                output['urls'].append(
                     {
                         'type': media_type,
                         'url': media[0]['media_url_https'],
@@ -42,7 +55,7 @@ def download_tweet(tweet_id):
                     quality = url['url'].split('/vid/')[1].split('/')[0]
                     link = url['url']
                     video_urls[quality] = link
-                output.append(
+                output['urls'].append(
                     {
                         'type': media_type,
                         'urls': video_urls,
@@ -57,7 +70,7 @@ def download_tweet(tweet_id):
                         media_variants.pop(count)
                     count += 1
                 media_variants.sort(key=lambda x: x['bitrate'], reverse=True)
-                output.append(
+                output['urls'].append(
                     {
                         'type': media_type,
                         'url': media_variants[0]['url'],
@@ -65,7 +78,14 @@ def download_tweet(tweet_id):
                 )
         return output
     except AttributeError:
-        return "Media Not Found"
+        return {
+            "tweet_author_username": tweet_author_username,
+            "tweet_author_name": tweet_author_name,
+            "tweet_date": tweet_date,
+            "text": tweet_text,
+            "link": tweet_link,
+            "media": False
+        }
 
 
 auth = OAuthHandler(
