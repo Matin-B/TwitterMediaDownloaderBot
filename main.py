@@ -1,7 +1,7 @@
 import logging
 
 from aiogram import Bot, Dispatcher, executor, filters, types
-from aiogram.types import ParseMode
+from aiogram.types import ParseMode, ContentType
 from aiogram.utils.emoji import emojize
 
 import config
@@ -24,7 +24,7 @@ async def send_welcome(message: types.Message):
 
 
 @dp.message_handler(filters.Regexp(regexp=r'twitter.com\/.*\/status\/([0-9]*)'))
-async def send_download_link(message: types.Message, regexp):
+async def tweet_link_handler(message: types.Message, regexp):
     """
     This handler will be called when user sends any text message
     """
@@ -93,6 +93,13 @@ async def send_download_link(message: types.Message, regexp):
                 parse_mode=ParseMode.MARKDOWN,
                 disable_web_page_preview=True
             )
+
+
+@dp.message_handler(content_types=ContentType.ANY)
+async def wrong_command(message: types.Message):
+    await message.reply(
+        "Invalid Tweet Link"
+    )
 
 
 if __name__ == '__main__':
