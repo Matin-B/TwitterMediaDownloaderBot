@@ -1,6 +1,6 @@
 import logging
 
-from aiogram import Bot, Dispatcher, executor, types
+from aiogram import Bot, Dispatcher, executor, filters, types
 from aiogram.types import ParseMode
 from aiogram.utils.emoji import emojize
 
@@ -23,13 +23,13 @@ async def send_welcome(message: types.Message):
     await message.reply("Hi!\nI'm EchoBot!\nPowered by aiogram.")
 
 
-@dp.message_handler()
-async def send_download_link(message: types.Message):
+@dp.message_handler(filters.Regexp(regexp=r'twitter.com\/.*\/status\/([0-9]*)'))
+async def send_download_link(message: types.Message, regexp):
     """
     This handler will be called when user sends any text message
     """
-    message_text = message.text
-    download_response = download_tweet(message_text)
+    tweet_id = regexp.group(1)
+    download_response = download_tweet(tweet_id)
     if download_response == "Not Found":
         await message.reply("Tweet Not Found")
     else:
@@ -37,7 +37,6 @@ async def send_download_link(message: types.Message):
         tweet_author_username = download_response['tweet_author_username']
         tweet_author_name = download_response['tweet_author_name']
         tweet_date = download_response['tweet_date']
-        # link = download_response['link']
         media_status = download_response['media']
 
         if media_status is True:
@@ -63,7 +62,28 @@ async def send_download_link(message: types.Message):
                     count += 1
                 await message.reply_media_group(media_group, )
             else:
-                pass
+                media_url = download_response['urls'][0]
+                media_type = media_url['type']
+                if media_type == 'photo':
+                    await message.reply_photo(
+                        photo=media_url['url'],
+                        caption=emojize(
+                            f'{tweet_text}\n\n\n:alarm_clock: {tweet_date}\n\n:link: [{tweet_author_name} '\
+                            f'(@{tweet_author_username})](https://twitter.com/{tweet_author_username})'\
+                            '\n\n:robot: @TwitterMediaDownloaderBot'
+                        ),
+                        parse_mode=ParseMode.MARKDOWN,
+                    )
+                elif media_type == 'animated_gif':
+                    await message.reply_animation(
+                        animation=media_url['url'],
+                        caption=emojize(
+                            f'{tweet_text}\n\n\n:alarm_clock: {tweet_date}\n\n:link: [{tweet_author_name} '\
+                            f'(@{tweet_author_username})](https://twitter.com/{tweet_author_username})'\
+                            '\n\n:robot: @TwitterMediaDownloaderBot'
+                        ),
+                        parse_mode=ParseMode.MARKDOWN,
+                    )
         else:
             await message.reply(
                 # https://www.webfx.com/tools/emoji-cheat-sheet/#
@@ -74,25 +94,20 @@ async def send_download_link(message: types.Message):
                 disable_web_page_preview=True
             )
 
-"""
-    if len(download_response) != 1:
-        # Create media group
-        media = types.MediaGroup()
-
-        for item in download_response:
-            media.attach_photo(item['url'])
-        await message.reply_media_group(
-            media=media
-        )
-    else:
-        for item in download_response:
-            if item['type'] == 'video':
-                await message.reply("This is a video")
-            elif item['type'] == 'photo':
-                await message.reply_photo(item['url'])
-            elif item['type'] == 'animated_gif':
-                await message.reply_animation(item['url'])
-"""
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
+
+
+"""
+elif media_type == 'video':
+    await message.reply_video(
+        video=media_url['url'],
+        caption=emojize(
+            f'{tweet_text}\n\n\n:alarm_clock: {tweet_date}\n\n:link: [{tweet_author_name} '\
+            f'(@{tweet_author_username})](https://twitter.com/{tweet_author_username})'\
+            '\n\n:robot: @TwitterMediaDownloaderBot'
+        ),
+        parse_mode=ParseMode.MARKDOWN,
+    )
+"""
