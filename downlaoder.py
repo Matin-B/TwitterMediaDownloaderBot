@@ -1,16 +1,21 @@
+from tweepy import API, OAuthHandler
+
 import config
-from tweepy import API, OAuthHandler, Stream
 
 
 def download_tweet(tweet_id):
+    """
+    Download a tweet from Twitter API
+    """
     try:
         tweet = api.get_status(tweet_id, tweet_mode="extended")
-        tweet_text = tweet.full_text
+        tweet_text = tweet.full_text.split(' ')[:-1]
+        tweet_text = ' '.join(tweet_text)
         tweet_link = tweet_text.split(' ')[-1]
         tweet_author_username = tweet.user.screen_name
         tweet_author_name = tweet.user.name
-        tweet_date = tweet.created_at.strftime("%Y/%m/%d | %H-%M") + " UTC"
-    except:
+        tweet_date = tweet.created_at.strftime("%Y/%m/%d | %H:%M") + " UTC"
+    except Exception:
         return "Not Found"
     try:
         output = {
@@ -24,7 +29,6 @@ def download_tweet(tweet_id):
         }
         media = tweet.extended_entities['media']
         if len(media) != 1:
-            links = []
             for item in media:
                 output['urls'].append(
                     {
