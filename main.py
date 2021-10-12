@@ -37,15 +37,37 @@ async def send_download_link(message: types.Message):
         tweet_author_username = download_response['tweet_author_username']
         tweet_author_name = download_response['tweet_author_name']
         tweet_date = download_response['tweet_date']
-        link = download_response['link']
+        # link = download_response['link']
         media_status = download_response['media']
 
         if media_status is True:
-            pass
+            media_urls = download_response['urls']
+            if len(media_urls) != 1:
+                media_group = types.MediaGroup()
+                count = 0
+                for item in media_urls:
+                    if count == 0:
+                        media_group.attach_photo(
+                            photo=item['url'],
+                            caption=emojize(
+                                f'{tweet_text}\n\n\n:alarm_clock: {tweet_date}\n\n:link: [{tweet_author_name} '\
+                                f'(@{tweet_author_username})](https://twitter.com/{tweet_author_username})'\
+                                '\n\n:robot: @TwitterMediaDownloaderBot'
+                            ),
+                            parse_mode=ParseMode.MARKDOWN,
+                        )
+                    else:
+                        media_group.attach_photo(
+                            photo=item['url']
+                        )
+                    count += 1
+                await message.reply_media_group(media_group, )
+            else:
+                pass
         else:
             await message.reply(
                 # https://www.webfx.com/tools/emoji-cheat-sheet/#
-                emojize(f'{tweet_text}\n\n:link: [{tweet_author_name} '\
+                emojize(f'{tweet_text}\n\n\n:alarm_clock: {tweet_date}\n\n:link: [{tweet_author_name} '\
                         f'(@{tweet_author_username})](https://twitter.com/{tweet_author_username})'\
                         '\n\n:robot: @TwitterMediaDownloaderBot'),
                 parse_mode=ParseMode.MARKDOWN,
