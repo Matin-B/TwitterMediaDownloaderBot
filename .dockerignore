@@ -130,9 +130,3 @@ dmypy.json
 
 # VSCode
 .vscode
-
-# Config files
-config.py
-
-# Fandogh.cloud configuration 
-.fandogh

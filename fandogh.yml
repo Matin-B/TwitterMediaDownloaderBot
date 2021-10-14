@@ -1,0 +1,11 @@
+kind: ExternalService
+name: twitter-dl-bot
+spec:
+  allow_http: true
+  image: 'twitter-dl-bot:v0.2'
+  image_pull_policy: IfNotPresent
+  path: /
+  port: 80
+  replicas: 1
+  resources:
+    memory: 200Mi
