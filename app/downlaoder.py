@@ -9,8 +9,16 @@ def download_tweet(tweet_id):
     """
     try:
         tweet = api.get_status(tweet_id, tweet_mode="extended")
-        tweet_text = tweet.full_text.split(' ')[:-1]
-        tweet_text = ' '.join(tweet_text)
+        if len(tweet.entities.get('urls')) == 0:
+            tweet_text = tweet.full_text.split(' ')[:-1]
+            tweet_text = ' '.join(tweet_text)
+        else:
+            tweet_text = tweet.full_text
+            tweet_urls = tweet.entities.get('urls')
+            for url in tweet_urls:
+                shorted_url = url['url']
+                original_url = url['expanded_url']
+                tweet_text = tweet_text.replace(shorted_url, original_url)
         tweet_link = tweet_text.split(' ')[-1]
         tweet_author_username = tweet.user.screen_name
         tweet_author_name = tweet.user.name

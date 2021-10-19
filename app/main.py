@@ -1,7 +1,13 @@
+import hashlib
 import logging
+import re
+from pdb import set_trace
 
 from aiogram import Bot, Dispatcher, executor, filters, types
-from aiogram.types import ParseMode, ContentType
+from aiogram.types import (ContentType, InlineQuery, InlineQueryResultArticle,
+                           InlineQueryResultGif, InlineQueryResultPhoto,
+                           InlineQueryResultVideo, InputTextMessageContent,
+                           ParseMode)
 from aiogram.utils.emoji import emojize
 
 import config
@@ -104,17 +110,3 @@ async def wrong_command(message: types.Message):
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
-
-
-"""
-elif media_type == 'video':
-    await message.reply_video(
-        video=media_url['url'],
-        caption=emojize(
-            f'{tweet_text}\n\n\n:alarm_clock: {tweet_date}\n\n:link: [{tweet_author_name} '\
-            f'(@{tweet_author_username})](https://twitter.com/{tweet_author_username})'\
-            '\n\n:robot: @TwitterMediaDownloaderBot'
-        ),
-        parse_mode=ParseMode.MARKDOWN,
-    )
-"""
